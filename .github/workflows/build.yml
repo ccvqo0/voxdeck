@@ -1,0 +1,160 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish VoxDeck.exe
+        run: >
+          dotnet publish src/VoxDeck.csproj -c Release -r win-x64 --self-contained true
+          -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true
+          -p:EnableCompressionInSingleFile=true -p:DebugType=none -o publish
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VoxDeck
+          path: publish/VoxDeck.exe
+
+      # ---- everything below exercises the real exe on real Windows ----
+      - name: Start Windows audio
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          Set-Service Audiosrv -StartupType Automatic; Start-Service Audiosrv -ErrorAction SilentlyContinue
+          Get-Service Audiosrv, AudioEndpointBuilder | Format-Table -Auto
+          try { Set-DisplayResolution -Width 1920 -Height 1080 -Force } catch { "resolution: $_" }
+          exit 0
+
+      - name: Trust the driver publisher (CI has nobody to click the prompt)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          Invoke-WebRequest https://download.vb-audio.com/Download_CABLE/VBCABLE_Driver_Pack45.zip -OutFile vb.zip
+          Expand-Archive vb.zip vb -Force
+          Get-ChildItem vb -Recurse | Select-Object Name, Length | Format-Table -Auto
+          $certs = Get-ChildItem vb -Recurse -Include *.cat, *.sys, *.exe | ForEach-Object { (Get-AuthenticodeSignature $_.FullName).SignerCertificate } | Where-Object { $_ } | Sort-Object Thumbprint -Unique
+          foreach ($c in $certs) { $c.Subject; $f = "$($c.Thumbprint).cer"; Export-Certificate -Cert $c -FilePath $f | Out-Null; Import-Certificate -FilePath $f -CertStoreLocation Cert:\LocalMachine\TrustedPublisher | Out-Null }
+          exit 0
+
+      - name: Install the virtual microphone with VoxDeck itself
+        shell: pwsh
+        continue-on-error: true
+        timeout-minutes: 6
+        run: |
+          $p = Start-Process -FilePath publish\VoxDeck.exe -ArgumentList '--install-driver' -Wait -PassThru -RedirectStandardOutput drv.log -RedirectStandardError drv.err
+          Get-Content drv.log, drv.err
+          "exit code $($p.ExitCode)"
+          Get-PnpDevice -Class AudioEndpoint -ErrorAction SilentlyContinue | Format-Table -Auto
+          exit 0
+
+      - name: Let desktop apps use the microphone (off by default on Windows Server)
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $k = 'SOFTWARE\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone'
+          foreach ($root in 'HKLM:', 'HKCU:') {
+            New-Item -Path "$root\$k" -Force | Out-Null; Set-ItemProperty -Path "$root\$k" -Name Value -Value Allow
+            New-Item -Path "$root\$k\NonPackaged" -Force | Out-Null; Set-ItemProperty -Path "$root\$k\NonPackaged" -Name Value -Value Allow
+          }
+          New-Item -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy' -Force | Out-Null
+          Set-ItemProperty -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\AppPrivacy' -Name LetAppsAccessMicrophone -Value 1 -Type DWord
+          Restart-Service camsvc -Force -ErrorAction SilentlyContinue
+          Restart-Service Audiosrv -Force -ErrorAction SilentlyContinue
+          Start-Sleep 3
+          exit 0
+
+      - name: Self-test
+        shell: pwsh
+        timeout-minutes: 10
+        run: |
+          $p = Start-Process -FilePath publish\VoxDeck.exe -ArgumentList '--selftest', 'st' -Wait -PassThru -RedirectStandardOutput st.log -RedirectStandardError st.err
+          Get-Content st.log, st.err
+          "exit code $($p.ExitCode)"
+          if ($p.ExitCode -ne 0) { exit 1 }
+
+      - name: Speech latency
+        if: always()
+        shell: pwsh
+        continue-on-error: true
+        timeout-minutes: 4
+        run: |
+          Start-Process -FilePath publish\VoxDeck.exe -ArgumentList '--ttsbench' -Wait -RedirectStandardOutput bench.log
+          Get-Content bench.log
+          exit 0
+
+      - name: Screenshots
+        if: always()
+        shell: pwsh
+        continue-on-error: true
+        timeout-minutes: 10
+        run: |
+          Add-Type -AssemblyName System.Windows.Forms, System.Drawing
+          New-Item -ItemType Directory shots -Force | Out-Null
+          function Shot($name, $appArgs) {
+            $p = Start-Process publish\VoxDeck.exe -ArgumentList $appArgs -PassThru
+            [System.Windows.Forms.Cursor]::Position = New-Object System.Drawing.Point(8, 600)
+            Start-Sleep 12
+            $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+            $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+            $g = [System.Drawing.Graphics]::FromImage($bmp); $g.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
+            $bmp.Save("$PWD\shots\$name.png"); $g.Dispose(); $bmp.Dispose()
+            "$name $($b.Width)x$($b.Height)"
+            Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue; Start-Sleep 2
+          }
+          Shot 'tts-ru' @('--page=0', '--lang=ru', '--demo=text')
+          Shot 'soundpad-memes' @('--page=1', '--lang=ru', '--demo=memes')
+          Shot 'soundpad-sites' @('--page=1', '--lang=ru', '--demo=sites')
+          Shot 'soundpad-builtin' @('--page=1', '--lang=ru')
+          Shot 'changer-ru' @('--page=2', '--lang=ru', '--demo=preset')
+          Shot 'settings-ru' @('--page=3', '--lang=ru')
+          Shot 'mini-windows' @('--page=0', '--lang=ru', '--demo=text,minitts,minipad')
+          Shot 'tts-en' @('--page=0', '--lang=en', '--demo=text')
+          Shot 'theme-daylight' @('--page=0', '--lang=ru', '--demo=text', '--theme=Daylight')
+          Shot 'theme-glass' @('--page=1', '--lang=ru', '"--theme=Liquid Glass"')
+          Get-Content "$env:APPDATA\VoxDeck\crash.log" -ErrorAction SilentlyContinue
+          exit 0
+
+      - name: Remove the driver again with VoxDeck
+        if: always()
+        shell: pwsh
+        continue-on-error: true
+        timeout-minutes: 4
+        run: |
+          $p = Start-Process -FilePath publish\VoxDeck.exe -ArgumentList '--install-driver', 'remove' -Wait -PassThru -RedirectStandardOutput undrv.log -RedirectStandardError undrv.err
+          Get-Content undrv.log, undrv.err
+          "exit code $($p.ExitCode)"
+          exit 0
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-report
+          path: |
+            shots
+            st
+            *.log
+            *.err
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: publish/VoxDeck.exe
+          generate_release_notes: false
+          body: |
+            Скачайте **VoxDeck.exe** ниже и запустите — установка не нужна (Windows 10/11, 64-бит).
+
+            Файл не подписан: если SmartScreen предупредит, нажмите «Подробнее» → «Выполнить в любом случае».
+            Виртуальный микрофон ставится кнопкой «Установить драйвер» в самом приложении.

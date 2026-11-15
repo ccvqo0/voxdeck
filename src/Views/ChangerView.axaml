@@ -1,0 +1,168 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="using:VoxDeck.Core" xmlns:v="using:VoxDeck.Views"
+             x:Class="VoxDeck.Views.ChangerView">
+  <Grid ColumnDefinitions="*,12,392">
+    <Grid RowDefinitions="Auto,Auto,*">
+      <StackPanel Margin="6,4,0,10">
+        <TextBlock Classes="h1" Text="{l:T ch.title}" />
+        <TextBlock Classes="sub" Text="{l:T ch.sub}" />
+      </StackPanel>
+
+      <Border Grid.Row="1" Classes="card" Margin="0,0,0,10">
+        <Grid ColumnDefinitions="*,20,*">
+          <StackPanel Spacing="12">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <Border Width="38" Height="38" CornerRadius="19" Background="{DynamicResource AccentSoftBrush}" Margin="0,0,12,0">
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.Mic}" Foreground="{DynamicResource AccentBrush}" FontSize="17" />
+              </Border>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Classes="h2" Text="{l:T ch.mic}" />
+                <TextBlock Classes="sub" Text="{l:T ch.mic.sub}" FontSize="12" />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="2" IsChecked="{Binding MicEnabled}" />
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <Border Width="38" Height="38" CornerRadius="19" Background="{DynamicResource AccentSoftBrush}" Margin="0,0,12,0">
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.WandSparkles}" Foreground="{DynamicResource AccentBrush}" FontSize="17" />
+              </Border>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Classes="h2" Text="{l:T ch.fx}" />
+                <TextBlock Classes="sub" Text="{l:T ch.fx.sub}" FontSize="12" />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="2" IsChecked="{Binding ChangerOn}" />
+            </Grid>
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <Border Width="38" Height="38" CornerRadius="19" Background="{DynamicResource AccentSoftBrush}" Margin="0,0,12,0">
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.Ear}" Foreground="{DynamicResource AccentBrush}" FontSize="17" />
+              </Border>
+              <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                <TextBlock Classes="h2" Text="{l:T ch.hear}" />
+                <TextBlock Classes="sub" Text="{l:T ch.hear.sub}" FontSize="12" />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="2" IsChecked="{Binding HearMyself}" />
+            </Grid>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Spacing="10">
+            <StackPanel Spacing="6">
+              <TextBlock Text="{l:T ch.input}" />
+              <ComboBox ItemsSource="{Binding Mics}" SelectedItem="{Binding SelectedMic}" />
+            </StackPanel>
+            <StackPanel Spacing="5">
+              <Grid ColumnDefinitions="*,Auto"><TextBlock Classes="sub" Text="{l:T ch.level.in}" /><TextBlock Grid.Column="1" Classes="icon" Text="{x:Static l:Ic.Mic}" FontSize="12" Foreground="{DynamicResource SubTextBrush}" /></Grid>
+              <ProgressBar Classes="meter" Minimum="0" Maximum="1" Value="{Binding MicLevel}" />
+            </StackPanel>
+            <StackPanel Spacing="5">
+              <Grid ColumnDefinitions="*,Auto"><TextBlock Classes="sub" Text="{l:T ch.level.out}" /><TextBlock Grid.Column="1" Classes="icon" Text="{x:Static l:Ic.WandSparkles}" FontSize="12" Foreground="{DynamicResource SubTextBrush}" /></Grid>
+              <ProgressBar Classes="meter" Minimum="0" Maximum="1" Value="{Binding OutLevel}" />
+            </StackPanel>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <Border Grid.Row="2" Classes="card" Padding="16,14,8,8">
+        <DockPanel>
+          <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*,260" Margin="0,0,8,10">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Classes="icon" Text="{x:Static l:Ic.Sparkles}" Foreground="{DynamicResource AccentBrush}" />
+              <TextBlock Classes="h2" Text="{l:T ch.presets}" VerticalAlignment="Center" />
+              <TextBlock Classes="sub" Text="{Binding PresetCount}" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBox Grid.Column="2" Text="{Binding Search}" Watermark="{l:T ch.search}">
+              <TextBox.InnerLeftContent>
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.Search}" FontSize="14" Margin="10,0,-4,0" Foreground="{DynamicResource SubTextBrush}" />
+              </TextBox.InnerLeftContent>
+            </TextBox>
+          </Grid>
+          <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding Cats}" Margin="0,0,0,4">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Button Classes="chip" Classes.sel="{Binding IsSelected}" Command="{Binding $parent[ItemsControl].DataContext.SelectCatCommand}" CommandParameter="{Binding}">
+                  <TextBlock Text="{Binding Title}" FontSize="13" />
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ItemsControl ItemsSource="{Binding Presets}" Margin="0,2,6,0">
+              <ItemsControl.ItemsPanel><ItemsPanelTemplate><v:FitWrapPanel MinItemWidth="128" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Button Classes="preset" Classes.sel="{Binding IsSelected}" Command="{Binding $parent[ItemsControl].DataContext.SelectPresetCommand}" CommandParameter="{Binding}">
+                    <Button.ContextMenu>
+                      <ContextMenu>
+                        <MenuItem Header="{l:T remove}" IsEnabled="{Binding IsCustom}" Command="{Binding Owner.DeletePresetCommand}" CommandParameter="{Binding}" />
+                      </ContextMenu>
+                    </Button.ContextMenu>
+                    <Grid RowDefinitions="Auto,*">
+                      <Border Width="30" Height="30" CornerRadius="9" Background="{Binding Brush}" HorizontalAlignment="Left">
+                        <TextBlock Classes="icon" Text="{Binding Icon}" Foreground="White" FontSize="15" />
+                      </Border>
+                      <StackPanel Grid.Row="1" VerticalAlignment="Bottom">
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Classes="sub" Text="{Binding CatName}" FontSize="11" TextWrapping="NoWrap" />
+                      </StackPanel>
+                    </Grid>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+    </Grid>
+
+    <!-- fine tune -->
+    <Border Grid.Column="2" Classes="card" Padding="16,14,6,12">
+      <DockPanel>
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,10,10">
+          <StackPanel>
+            <TextBlock Classes="cap" Text="{l:T ch.tune}" />
+            <TextBlock Text="{Binding CurrentName}" FontSize="17" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,2,0,0" />
+          </StackPanel>
+          <Button Grid.Column="1" Command="{Binding ResetCommand}" Padding="10,6" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <TextBlock Classes="icon" Text="{x:Static l:Ic.RotateCcw}" FontSize="13" />
+              <TextBlock Text="{l:T reset}" FontSize="13" />
+            </StackPanel>
+          </Button>
+        </Grid>
+        <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,8,Auto" Margin="0,10,10,0">
+          <TextBox Text="{Binding NewPresetName}" Watermark="{l:T ch.preset.name}" />
+          <Button Grid.Column="2" Classes="primary" Command="{Binding SavePresetCommand}" Padding="12,8">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <TextBlock Classes="icon" Text="{x:Static l:Ic.Save}" FontSize="14" />
+              <TextBlock Text="{l:T save}" />
+            </StackPanel>
+          </Button>
+        </Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <ItemsControl ItemsSource="{Binding Groups}" Margin="0,0,12,0">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <StackPanel Margin="0,4,0,12">
+                  <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+                    <TextBlock Classes="icon" Text="{Binding Icon}" FontSize="14" Foreground="{DynamicResource AccentBrush}" />
+                    <TextBlock Classes="cap" Text="{Binding Title}" VerticalAlignment="Center" />
+                  </StackPanel>
+                  <ItemsControl ItemsSource="{Binding Sliders}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate>
+                        <Grid ColumnDefinitions="118,*,64" Margin="0,1">
+                          <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="13" TextTrimming="CharacterEllipsis" />
+                          <Slider Grid.Column="1" Minimum="{Binding Min}" Maximum="{Binding Max}" Value="{Binding Value}" TickFrequency="{Binding Step}" IsSnapToTickEnabled="True" />
+                          <TextBlock Grid.Column="2" Classes="val" Text="{Binding ValueText}" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </DockPanel>
+    </Border>
+  </Grid>
+</UserControl>

@@ -1,0 +1,26 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="using:VoxDeck.Core"
+        x:Class="VoxDeck.Views.HotkeyDialog"
+        Title="VoxDeck" Width="380" SizeToContent="Height" CanResize="False" FontSize="14"
+        SystemDecorations="None" Background="Transparent" TransparencyLevelHint="Transparent"
+        ShowInTaskbar="False" WindowStartupLocation="CenterOwner">
+  <Border Margin="8" CornerRadius="{DynamicResource CardRadius}" Background="{DynamicResource PopupBgBrush}" BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1" Padding="20">
+    <StackPanel Spacing="12">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Classes="icon" Text="{x:Static l:Ic.Keyboard}" Foreground="{DynamicResource AccentBrush}" />
+        <TextBlock Classes="h2" Text="{l:T hk.title}" VerticalAlignment="Center" />
+      </StackPanel>
+      <TextBlock x:Name="SoundName" Classes="sub" />
+      <Border Classes="inset" Padding="16,18">
+        <TextBlock x:Name="Combo" Text="—" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center" />
+      </Border>
+      <TextBlock Classes="sub" Text="{l:T hk.press}" />
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+        <Button x:Name="ClearBtn" Classes="danger"><TextBlock Text="{l:T hk.clear}" /></Button>
+        <Button Grid.Column="2" x:Name="CancelBtn" Margin="0,0,8,0"><TextBlock Text="{l:T cancel}" /></Button>
+        <Button Grid.Column="3" x:Name="OkBtn" Classes="primary"><TextBlock Text="{l:T ok}" /></Button>
+      </Grid>
+    </StackPanel>
+  </Border>
+</Window>

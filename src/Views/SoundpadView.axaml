@@ -1,0 +1,192 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="using:VoxDeck.Core" xmlns:vm="using:VoxDeck.ViewModels" xmlns:v="using:VoxDeck.Views"
+             x:Class="VoxDeck.Views.SoundpadView">
+  <UserControl.Resources>
+    <DataTemplate x:Key="TileTemplate">
+      <Button Classes="tile" Classes.playing="{Binding IsPlaying}" Classes.img="{Binding HasImage}" Height="104" HorizontalAlignment="Stretch"
+              Command="{Binding Pad.PlayCommand}" CommandParameter="{Binding}" ToolTip.Tip="{Binding Name}">
+        <Button.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="{l:T play}" Command="{Binding Pad.PlayCommand}" CommandParameter="{Binding}" />
+            <MenuItem Header="{l:T preview}" Command="{Binding Pad.PreviewCommand}" CommandParameter="{Binding}" />
+            <MenuItem Header="{l:T stop}" Command="{Binding Pad.StopOneCommand}" CommandParameter="{Binding}" />
+            <Separator />
+            <MenuItem Header="{l:T fav.toggle}" Command="{Binding Pad.ToggleFavCommand}" CommandParameter="{Binding}" />
+            <MenuItem Header="{l:T hotkey.assign}" Command="{Binding Pad.AssignHotkeyCommand}" CommandParameter="{Binding}" />
+            <MenuItem Header="{l:T download}" Command="{Binding Pad.DownloadCommand}" CommandParameter="{Binding}" />
+            <Separator IsVisible="{Binding IsLocal}" />
+            <MenuItem Header="{l:T remove}" IsVisible="{Binding IsLocal}" Command="{Binding Pad.RemoveCommand}" CommandParameter="{Binding}" />
+          </ContextMenu>
+        </Button.ContextMenu>
+        <Border Classes="face" CornerRadius="{DynamicResource TileRadius}" ClipToBounds="True">
+          <Panel>
+            <Panel IsVisible="{Binding HasImage}">
+              <Image vm:Img.Url="{Binding Image}" Stretch="UniformToFill" />
+              <Border>
+                <Border.Background>
+                  <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                    <GradientStop Color="#33000000" Offset="0" />
+                    <GradientStop Color="#55000000" Offset="0.4" />
+                    <GradientStop Color="#E6000000" Offset="1" />
+                  </LinearGradientBrush>
+                </Border.Background>
+              </Border>
+            </Panel>
+            <Border Width="3" HorizontalAlignment="Left" Background="{Binding Brush}" IsVisible="{Binding !HasImage}" />
+            <TextBlock Classes="icon" Text="{Binding Icon}" FontSize="18" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="13,11,0,0" Foreground="{Binding Brush}" IsVisible="{Binding !HasImage}" />
+            <StackPanel VerticalAlignment="Bottom" Margin="13,0,10,9">
+              <TextBlock Classes="name" Text="{Binding Name}" FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" LineHeight="16" />
+              <Grid ColumnDefinitions="*,Auto" Margin="0,2,0,0">
+                <TextBlock Classes="meta" Text="{Binding Sub}" FontSize="11" TextTrimming="CharacterEllipsis" />
+                <TextBlock Classes="meta" Grid.Column="1" Text="{Binding DurText}" FontSize="11" Margin="6,0,0,0" />
+              </Grid>
+            </StackPanel>
+            <Border Background="{DynamicResource SolidBgBrush}" BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1" CornerRadius="4" Padding="5,1" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="38,10,0,0" IsVisible="{Binding HasHotkey}">
+              <TextBlock Classes="key" Text="{Binding Hotkey}" FontSize="11" FontWeight="SemiBold" />
+            </Border>
+            <StackPanel Classes="actions" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,7,7,0">
+              <Button Classes="mini" Command="{Binding Pad.PreviewCommand}" CommandParameter="{Binding}" ToolTip.Tip="{l:T pad.preview.tip}">
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.Headphones}" />
+              </Button>
+              <Button Classes="mini" Classes.on="{Binding IsFav}" Command="{Binding Pad.ToggleFavCommand}" CommandParameter="{Binding}" ToolTip.Tip="{l:T fav}">
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.Star}" />
+              </Button>
+              <Button Classes="mini" Command="{Binding Pad.DownloadCommand}" CommandParameter="{Binding}" ToolTip.Tip="{l:T download}">
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.Download}" />
+              </Button>
+            </StackPanel>
+            <TextBlock Classes="icon" Text="{x:Static l:Ic.Star}" FontSize="12" Foreground="#FFC83D" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,13,11,0" IsVisible="{Binding IsFav}" />
+            <ProgressBar IsIndeterminate="True" VerticalAlignment="Bottom" IsVisible="{Binding IsLoading}" Background="Transparent" />
+            <Border Classes="ring" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="2" CornerRadius="{DynamicResource TileRadius}" IsHitTestVisible="False" />
+          </Panel>
+        </Border>
+      </Button>
+    </DataTemplate>
+  </UserControl.Resources>
+
+  <Grid ColumnDefinitions="216,12,*">
+    <!-- sections -->
+    <Border Classes="card" Padding="8,10,4,8">
+      <ListBox ItemsSource="{Binding Sections}" SelectedItem="{Binding Section}">
+        <ListBox.Styles>
+          <Style Selector="ListBoxItem">
+            <Setter Property="IsEnabled" Value="{Binding IsItem}" />
+            <Setter Property="Padding" Value="10,7" />
+          </Style>
+        </ListBox.Styles>
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <Panel>
+              <TextBlock Classes="cap" Text="{Binding Title}" IsVisible="{Binding IsHeader}" Margin="0,8,0,0" />
+              <Grid ColumnDefinitions="Auto,*,Auto" IsVisible="{Binding IsItem}">
+                <TextBlock Classes="icon" Text="{Binding Icon}" FontSize="14" Margin="0,0,10,0" Foreground="{DynamicResource AccentBrush}" />
+                <TextBlock Grid.Column="1" Text="{Binding Title}" TextTrimming="CharacterEllipsis" FontSize="13" />
+                <TextBlock Grid.Column="2" Classes="sub" Text="{Binding Count}" FontSize="11" VerticalAlignment="Center" />
+              </Grid>
+            </Panel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </Border>
+
+    <!-- content -->
+    <Grid Grid.Column="2" RowDefinitions="Auto,Auto,Auto,*">
+      <Grid ColumnDefinitions="*,Auto" Margin="6,4,0,10">
+        <StackPanel>
+          <TextBlock Classes="h1" Text="{Binding Title}" TextTrimming="CharacterEllipsis" />
+          <TextBlock Classes="sub" Text="{l:T pad.sub}" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Button Command="{Binding AddFilesCommand}" ToolTip.Tip="{l:T pad.add.tip}">
+            <StackPanel Orientation="Horizontal" Spacing="7">
+              <TextBlock Classes="icon" Text="{x:Static l:Ic.Plus}" FontSize="15" />
+              <TextBlock Text="{l:T pad.add}" />
+            </StackPanel>
+          </Button>
+          <Button Classes="icon" x:Name="PinBtn" ToolTip.Tip="{l:T pin.tip}">
+            <TextBlock Classes="icon" Text="{x:Static l:Ic.Pin}" FontSize="15" />
+          </Button>
+          <Button Classes="danger" Command="{Binding StopAllCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="7">
+              <TextBlock Classes="icon" Text="{x:Static l:Ic.Square}" FontSize="13" />
+              <TextBlock Text="{l:T stop}" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Grid>
+
+      <Border Grid.Row="1" Classes="card" Padding="14,12" Margin="0,0,0,10">
+        <Grid ColumnDefinitions="*,10,150,14,Auto">
+          <TextBox Text="{Binding Search}" Watermark="{Binding SearchHint}" VerticalAlignment="Center" VerticalContentAlignment="Center">
+            <TextBox.InnerLeftContent>
+              <TextBlock Classes="icon" Text="{x:Static l:Ic.Search}" FontSize="14" Margin="10,0,-4,0" Foreground="{DynamicResource SubTextBrush}" />
+            </TextBox.InnerLeftContent>
+          </TextBox>
+          <ComboBox Grid.Column="2" ItemsSource="{Binding SortNames}" SelectedIndex="{Binding SortIndex}" VerticalAlignment="Center" />
+          <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="14">
+            <StackPanel Width="96" VerticalAlignment="Center" Spacing="3">
+              <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{l:T volume}" FontSize="12" /><TextBlock Grid.Column="1" Classes="val" Text="{Binding VolumeText}" FontSize="11" /></Grid>
+              <Slider Minimum="0" Maximum="100" Value="{Binding Volume}" />
+            </StackPanel>
+            <StackPanel Width="96" VerticalAlignment="Center" Spacing="3">
+              <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{l:T speed}" FontSize="12" /><TextBlock Grid.Column="1" Classes="val" Text="{Binding SpeedText}" FontSize="11" /></Grid>
+              <Slider Minimum="50" Maximum="200" Value="{Binding Speed}" TickFrequency="5" IsSnapToTickEnabled="True" />
+            </StackPanel>
+            <ToggleButton Classes="icon" IsChecked="{Binding Overlap}" ToolTip.Tip="{l:T pad.overlap.tip}" Width="36" Height="36" VerticalAlignment="Center">
+              <TextBlock Classes="icon" Text="{x:Static l:Ic.Layers}" FontSize="15" />
+            </ToggleButton>
+            <ToggleButton Classes="icon" IsChecked="{Binding Loop}" ToolTip.Tip="{l:T pad.loop.tip}" Width="36" Height="36" VerticalAlignment="Center" Margin="-10,0,0,0">
+              <TextBlock Classes="icon" Text="{x:Static l:Ic.Repeat}" FontSize="15" />
+            </ToggleButton>
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <StackPanel Grid.Row="2">
+        <ItemsControl ItemsSource="{Binding Chips}" IsVisible="{Binding ShowGenres}" Margin="2,0,0,4">
+          <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Button Classes="chip" Classes.sel="{Binding IsSelected}" Command="{Binding $parent[ItemsControl].DataContext.SelectGenreCommand}" CommandParameter="{Binding}">
+                <TextBlock Text="{Binding Title}" FontSize="13" />
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <ItemsControl ItemsSource="{Binding Suggestions}" IsVisible="{Binding ShowSuggestions}" Margin="2,0,0,4">
+          <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate>
+              <Button Classes="chip" Command="{Binding $parent[ItemsControl].DataContext.SuggestCommand}" CommandParameter="{Binding}">
+                <TextBlock Text="{Binding Title}" FontSize="13" />
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsLoading}" Margin="2,0,10,8" />
+      </StackPanel>
+
+      <Panel Grid.Row="3">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" x:Name="Scroll">
+          <StackPanel>
+            <TextBlock Classes="sub" Text="{Binding CountText}" Margin="4,0,0,8" />
+            <ItemsControl ItemsSource="{Binding Visible}" ItemTemplate="{StaticResource TileTemplate}" Margin="2,0,2,0">
+              <ItemsControl.ItemsPanel><ItemsPanelTemplate><v:FitWrapPanel MinItemWidth="158" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            </ItemsControl>
+            <Button Classes="ghost" Command="{Binding LoadMoreCommand}" IsVisible="{Binding CanLoadMore}" HorizontalAlignment="Center" Margin="0,10,0,18" Padding="18,9">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.ChevronDown}" FontSize="15" />
+                <TextBlock Text="{l:T pad.more}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </ScrollViewer>
+        <StackPanel IsVisible="{Binding IsEmpty}" HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10" MaxWidth="420">
+          <TextBlock Classes="icon" Text="{x:Static l:Ic.Music}" FontSize="40" Foreground="{DynamicResource SubTextBrush}" />
+          <TextBlock Classes="sub" Text="{Binding EmptyText}" TextAlignment="Center" FontSize="14" />
+        </StackPanel>
+      </Panel>
+    </Grid>
+  </Grid>
+</UserControl>

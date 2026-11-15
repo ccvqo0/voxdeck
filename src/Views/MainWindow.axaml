@@ -1,0 +1,134 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="using:VoxDeck.Core" xmlns:v="using:VoxDeck.Views"
+        x:Class="VoxDeck.Views.MainWindow"
+        Title="VoxDeck" Width="1240" Height="800" MinWidth="1000" MinHeight="640"
+        Icon="/Assets/app.ico" Background="Transparent" 
+        ExtendClientAreaToDecorationsHint="True" ExtendClientAreaTitleBarHeightHint="46"
+        WindowStartupLocation="CenterScreen" DragDrop.AllowDrop="True">
+  <Panel x:Name="Root">
+    <Border x:Name="Bg" Background="{DynamicResource WindowBgBrush}" />
+    <Panel x:Name="Blobs" ClipToBounds="True" IsHitTestVisible="False">
+      <Ellipse Classes="b1" Width="760" Height="760" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-260,-300,0,0" Fill="{DynamicResource Blob1Brush}" />
+      <Ellipse Classes="b2" Width="860" Height="860" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-320,-380" Fill="{DynamicResource Blob2Brush}" />
+      <Ellipse Classes="b3" Width="520" Height="520" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-220,120,0" Fill="{DynamicResource Blob1Brush}" Opacity="0.6" />
+    </Panel>
+    <Border Background="{DynamicResource GlassHighlightBrush}" IsHitTestVisible="False" />
+
+    <Grid ColumnDefinitions="236,*" RowDefinitions="46,*">
+      <!-- ===== Sidebar ===== -->
+      <Border Grid.RowSpan="2" Margin="12,12,6,12" Classes="card" Padding="12">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Top" x:Name="LogoBar" Background="Transparent">
+            <StackPanel Orientation="Horizontal" Margin="6,6,0,18" Spacing="10">
+              <v:LogoMark Width="34" Height="34" Back="{DynamicResource AccentBrush}" Bars="{DynamicResource OnAccentBrush}" />
+              <StackPanel VerticalAlignment="Center">
+                <TextBlock Text="VoxDeck" FontSize="16" FontWeight="SemiBold" />
+                <TextBlock Classes="sub" Text="{l:T app.tagline}" FontSize="11" />
+              </StackPanel>
+            </StackPanel>
+          </StackPanel>
+
+          <StackPanel DockPanel.Dock="Bottom" Spacing="8">
+            <Border Classes="inset" Padding="12">
+              <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto" Height="24">
+                  <TextBlock Classes="icon" Text="{x:Static l:Ic.Cable}" FontSize="15" Foreground="{DynamicResource AccentBrush}" VerticalAlignment="Center" />
+                  <TextBlock Grid.Column="1" Classes="cap" Text="{l:T voice.title}" VerticalAlignment="Center" Margin="8,0" />
+                  <Panel Grid.Column="2" VerticalAlignment="Center">
+                    <Ellipse Width="8" Height="8" Fill="{DynamicResource OkBrush}" IsVisible="{Binding VoiceReady}" />
+                    <Ellipse Width="8" Height="8" Fill="{DynamicResource WarnBrush}" IsVisible="{Binding NoVoice}" />
+                  </Panel>
+                  <Button Grid.Column="4" Classes="icon sm" Command="{Binding RecheckCommand}" ToolTip.Tip="{l:T voice.recheck}" Margin="0,-2,-4,-2">
+                    <TextBlock Classes="icon" Text="{x:Static l:Ic.RotateCcw}" FontSize="13" />
+                  </Button>
+                </Grid>
+                <TextBlock Text="{Binding VoiceText}" FontWeight="SemiBold" FontSize="13" TextTrimming="CharacterEllipsis" ToolTip.Tip="{Binding VoiceTip}" />
+                <TextBlock Classes="sub" Text="{Binding VoiceHint}" FontSize="12" />
+                <Button Classes="primary" Padding="8,8" Margin="0,4,0,0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding InstallDriverCommand}" IsVisible="{Binding CanInstall}" ToolTip.Tip="{l:T drv.tip}">
+                  <StackPanel Orientation="Horizontal" Spacing="7">
+                    <TextBlock Classes="icon" Text="{x:Static l:Ic.ShieldCheck}" FontSize="13" />
+                    <TextBlock Text="{l:T drv.install}" FontSize="12" />
+                  </StackPanel>
+                </Button>
+                <StackPanel IsVisible="{Binding IsInstalling}" Spacing="6" Margin="0,4,0,0">
+                  <ProgressBar IsIndeterminate="True" />
+                  <TextBlock Classes="sub" Text="{Binding InstallText}" FontSize="12" />
+                </StackPanel>
+                <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding CanSystemMic}" Margin="0,4,0,-4" ToolTip.Tip="{l:T sysmic.tip}">
+                  <TextBlock Text="{l:T sysmic.title}" FontSize="12" VerticalAlignment="Center" TextWrapping="Wrap" />
+                  <ToggleSwitch Grid.Column="1" IsChecked="{Binding SystemMic}" Margin="6,0,0,0" />
+                </Grid>
+              </StackPanel>
+            </Border>
+            <Grid ColumnDefinitions="*,Auto" Margin="6,0,0,0">
+              <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.Headphones}" FontSize="14" Foreground="{DynamicResource SubTextBrush}" />
+                <TextBlock Text="{l:T hear.sounds}" FontSize="13" VerticalAlignment="Center" />
+              </StackPanel>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding Set.MonitorEnabled}" ToolTip.Tip="{l:T hear.sounds.tip}" />
+            </Grid>
+            <Button Classes="danger" HorizontalAlignment="Stretch" Command="{Binding StopAllCommand}" Padding="10,9">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.CircleStop}" FontSize="15" />
+                <TextBlock Text="{l:T stop.all}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+
+          <StackPanel>
+            <TextBlock Classes="cap" Text="{l:T nav.tools}" Margin="12,0,0,6" />
+            <Button Classes="nav" Classes.active="{Binding IsPage0}" Command="{Binding GoCommand}" CommandParameter="0">
+              <Grid ColumnDefinitions="Auto,Auto,*">
+                <Border Classes="ind" Width="3" Height="16" CornerRadius="2" Background="{DynamicResource AccentBrush}" Margin="-6,0,8,0" />
+                <TextBlock Grid.Column="1" Classes="icon" Text="{x:Static l:Ic.MessageSquareText}" Margin="0,0,11,0" />
+                <TextBlock Grid.Column="2" Text="{l:T nav.tts}" VerticalAlignment="Center" />
+              </Grid>
+            </Button>
+            <Button Classes="nav" Classes.active="{Binding IsPage1}" Command="{Binding GoCommand}" CommandParameter="1">
+              <Grid ColumnDefinitions="Auto,Auto,*">
+                <Border Classes="ind" Width="3" Height="16" CornerRadius="2" Background="{DynamicResource AccentBrush}" Margin="-6,0,8,0" />
+                <TextBlock Grid.Column="1" Classes="icon" Text="{x:Static l:Ic.Grid2x2}" Margin="0,0,11,0" />
+                <TextBlock Grid.Column="2" Text="{l:T nav.pad}" VerticalAlignment="Center" />
+              </Grid>
+            </Button>
+            <Button Classes="nav" Classes.active="{Binding IsPage2}" Command="{Binding GoCommand}" CommandParameter="2">
+              <Grid ColumnDefinitions="Auto,Auto,*">
+                <Border Classes="ind" Width="3" Height="16" CornerRadius="2" Background="{DynamicResource AccentBrush}" Margin="-6,0,8,0" />
+                <TextBlock Grid.Column="1" Classes="icon" Text="{x:Static l:Ic.WandSparkles}" Margin="0,0,11,0" />
+                <TextBlock Grid.Column="2" Text="{l:T nav.changer}" VerticalAlignment="Center" />
+              </Grid>
+            </Button>
+            <TextBlock Classes="cap" Text="{l:T nav.app}" Margin="12,16,0,6" />
+            <Button Classes="nav" Classes.active="{Binding IsPage3}" Command="{Binding GoCommand}" CommandParameter="3">
+              <Grid ColumnDefinitions="Auto,Auto,*">
+                <Border Classes="ind" Width="3" Height="16" CornerRadius="2" Background="{DynamicResource AccentBrush}" Margin="-6,0,8,0" />
+                <TextBlock Grid.Column="1" Classes="icon" Text="{x:Static l:Ic.Settings}" Margin="0,0,11,0" />
+                <TextBlock Grid.Column="2" Text="{l:T nav.settings}" VerticalAlignment="Center" />
+              </Grid>
+            </Button>
+          </StackPanel>
+        </DockPanel>
+      </Border>
+
+      <!-- ===== Title bar / island ===== -->
+      <Panel Grid.Column="1" x:Name="TitleBar" Background="Transparent">
+        <Border Classes="island" Classes.active="{Binding IslandActive}" Classes.error="{Binding IslandError}" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,8,0,0" IsHitTestVisible="False">
+          <StackPanel Orientation="Horizontal" Spacing="9">
+            <TextBlock Classes="icon" Text="{Binding IslandIcon}" FontSize="14" Foreground="{DynamicResource AccentBrush}" />
+            <TextBlock Text="{Binding IslandText}" FontSize="13" FontWeight="Medium" VerticalAlignment="Center" MaxWidth="380" TextTrimming="CharacterEllipsis" />
+            <v:Visualizer Width="58" Height="18" Bars="12" VerticalAlignment="Center" />
+          </StackPanel>
+        </Border>
+      </Panel>
+
+      <!-- ===== Pages ===== -->
+      <Panel Grid.Column="1" Grid.Row="1" Margin="8,2,14,12" x:Name="Pages">
+        <v:TtsView x:Name="P0" Classes="page" DataContext="{Binding Tts}" IsVisible="False" />
+        <v:SoundpadView x:Name="P1" Classes="page" DataContext="{Binding Pad}" IsVisible="False" />
+        <v:ChangerView x:Name="P2" Classes="page" DataContext="{Binding Changer}" IsVisible="False" />
+        <v:SettingsView x:Name="P3" Classes="page" DataContext="{Binding Set}" IsVisible="False" />
+      </Panel>
+    </Grid>
+  </Panel>
+</Window>

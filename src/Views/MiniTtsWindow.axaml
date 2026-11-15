@@ -1,0 +1,32 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="using:VoxDeck.Core" xmlns:v="using:VoxDeck.Views"
+        x:Class="VoxDeck.Views.MiniTtsWindow"
+        Title="VoxDeck TTS" Width="400" SizeToContent="Height" CanResize="False" FontSize="13"
+        SystemDecorations="None" Background="Transparent" TransparencyLevelHint="Transparent"
+        Topmost="True" ShowInTaskbar="False" WindowStartupLocation="Manual">
+  <Border Margin="6" CornerRadius="{DynamicResource CardRadius}" Background="{DynamicResource PopupBgBrush}" BorderBrush="{DynamicResource StrokeBrush}" BorderThickness="1"
+          Opacity="{Binding Set.MiniOpacity01}" ClipToBounds="True">
+    <StackPanel>
+      <Grid x:Name="Header" ColumnDefinitions="Auto,*,Auto,Auto" Background="Transparent" Margin="12,8,6,2">
+        <TextBlock Classes="icon" Text="{x:Static l:Ic.MessageSquareText}" FontSize="14" Foreground="{DynamicResource AccentBrush}" Margin="0,0,8,0" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+          <TextBlock Text="{l:T mini.tts}" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <v:Visualizer Width="44" Height="14" Bars="9" VerticalAlignment="Center" />
+        </StackPanel>
+        <Slider Grid.Column="2" Width="70" Minimum="25" Maximum="100" Value="{Binding Set.MiniOpacity}" ToolTip.Tip="{l:T mini.opacity}" VerticalAlignment="Center" />
+        <Button Grid.Column="3" x:Name="CloseBtn" Classes="icon sm" Margin="6,0,0,0"><TextBlock Classes="icon" Text="{x:Static l:Ic.X}" /></Button>
+      </Grid>
+      <TextBox x:Name="Input" Text="{Binding Tts.Text}" AcceptsReturn="True" TextWrapping="Wrap" MinHeight="64" MaxHeight="160" Margin="10,6,10,0" Watermark="{l:T mini.hint}" />
+      <ProgressBar IsIndeterminate="True" IsVisible="{Binding Tts.IsBusy}" Margin="12,4,12,0" />
+      <Grid ColumnDefinitions="Auto,Auto,Auto,*" Margin="10,8,10,10">
+        <Button Classes="primary" Padding="12,7" Command="{Binding Tts.SpeakCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="6"><TextBlock Classes="icon" Text="{x:Static l:Ic.Send}" FontSize="13" /><TextBlock Text="{l:T play}" /></StackPanel>
+        </Button>
+        <Button Grid.Column="1" Classes="icon" Margin="6,0,0,0" Command="{Binding Tts.PreviewCommand}" ToolTip.Tip="{l:T preview}"><TextBlock Classes="icon" Text="{x:Static l:Ic.Headphones}" FontSize="14" /></Button>
+        <Button Grid.Column="2" Classes="icon" Command="{Binding Tts.StopCommand}" ToolTip.Tip="{l:T stop}"><TextBlock Classes="icon" Text="{x:Static l:Ic.Square}" FontSize="13" /></Button>
+        <TextBlock Grid.Column="3" Classes="sub" Text="{Binding Tts.SelectedVoiceText}" HorizontalAlignment="Right" VerticalAlignment="Center" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" FontSize="12" Margin="8,0,2,0" />
+      </Grid>
+    </StackPanel>
+  </Border>
+</Window>

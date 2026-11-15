@@ -1,0 +1,198 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:l="using:VoxDeck.Core" xmlns:v="using:VoxDeck.Views"
+             x:Class="VoxDeck.Views.SettingsView">
+  <ScrollViewer VerticalScrollBarVisibility="Auto">
+    <StackPanel Spacing="12" Margin="0,0,6,0">
+      <StackPanel Margin="6,4,0,2">
+        <TextBlock Classes="h1" Text="{l:T set.title}" />
+        <TextBlock Classes="sub" Text="{l:T set.sub}" />
+      </StackPanel>
+
+      <!-- appearance -->
+      <Border Classes="card">
+        <StackPanel Spacing="14">
+          <Grid ColumnDefinitions="Auto,*,220">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Classes="icon" Text="{x:Static l:Ic.Palette}" Foreground="{DynamicResource AccentBrush}" />
+              <TextBlock Classes="h2" Text="{l:T set.themes}" VerticalAlignment="Center" />
+              <TextBlock Classes="sub" Text="{Binding ThemeCount}" VerticalAlignment="Center" />
+            </StackPanel>
+            <Grid Grid.Column="2" ColumnDefinitions="Auto,*">
+              <TextBlock Classes="icon" Text="{x:Static l:Ic.Languages}" Foreground="{DynamicResource SubTextBrush}" Margin="0,0,10,0" />
+              <ComboBox Grid.Column="1" ItemsSource="{Binding Langs}" SelectedItem="{Binding Lang}" />
+            </Grid>
+          </Grid>
+          <ItemsControl ItemsSource="{Binding Themes}" Margin="0,0,-10,0">
+            <ItemsControl.ItemsPanel><ItemsPanelTemplate><v:FitWrapPanel MinItemWidth="150" /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+              <DataTemplate>
+                <Button Classes="theme" Classes.sel="{Binding IsSelected}" Command="{Binding $parent[ItemsControl].DataContext.SelectThemeCommand}" CommandParameter="{Binding}">
+                  <StackPanel Spacing="6">
+                    <Panel Height="84">
+                      <Border CornerRadius="12" Background="{Binding Def.Preview}" BorderBrush="{DynamicResource StrokeSoftBrush}" BorderThickness="1" ClipToBounds="True">
+                        <Panel>
+                          <Border Background="{Binding Def.SurfacePreview}" BorderBrush="{Binding Def.StrokePreview}" BorderThickness="1" CornerRadius="7" Margin="10,10,46,30">
+                            <StackPanel Margin="7,6" Spacing="4">
+                              <Border Height="4" Width="44" CornerRadius="2" Background="{Binding Def.TextPreview}" HorizontalAlignment="Left" />
+                              <Border Height="4" Width="28" CornerRadius="2" Background="{Binding Def.TextPreview}" Opacity="0.45" HorizontalAlignment="Left" />
+                            </StackPanel>
+                          </Border>
+                          <Border Width="30" Height="30" CornerRadius="15" Background="{Binding Def.AccentPreview}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,10,10,0" />
+                          <Border Height="12" CornerRadius="6" Background="{Binding Def.AccentPreview}" VerticalAlignment="Bottom" Margin="10,0,62,10" />
+                        </Panel>
+                      </Border>
+                      <Border Classes="sel" CornerRadius="12" BorderBrush="{DynamicResource AccentBrush}" BorderThickness="2.5" IsHitTestVisible="False">
+                        <Border Width="20" Height="20" CornerRadius="10" Background="{DynamicResource AccentBrush}" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,7,7">
+                          <TextBlock Classes="icon" Text="{x:Static l:Ic.Check}" FontSize="12" Foreground="{DynamicResource OnAccentBrush}" />
+                        </Border>
+                      </Border>
+                    </Panel>
+                    <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Medium" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  </StackPanel>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <Grid ColumnDefinitions="*,12,*">
+        <!-- window -->
+        <Border Classes="card">
+          <StackPanel Spacing="14">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Classes="icon" Text="{x:Static l:Ic.AppWindow}" Foreground="{DynamicResource AccentBrush}" />
+              <TextBlock Classes="h2" Text="{l:T set.window}" VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{l:T set.opacity}" /><TextBlock Grid.Column="1" Classes="val" Text="{Binding OpacityText}" /></Grid>
+              <Slider Minimum="30" Maximum="100" Value="{Binding WindowOpacity}" />
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{l:T set.miniopacity}" /><TextBlock Grid.Column="1" Classes="val" Text="{Binding MiniOpacityText}" /></Grid>
+              <Slider Minimum="25" Maximum="100" Value="{Binding MiniOpacity}" />
+            </StackPanel>
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel><TextBlock Text="{l:T set.ontop}" /><TextBlock Classes="sub" Text="{l:T set.ontop.sub}" FontSize="12" /></StackPanel>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding AlwaysOnTop}" />
+            </Grid>
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel><TextBlock Text="{l:T set.blur}" /><TextBlock Classes="sub" Text="{l:T set.blur.sub}" FontSize="12" /></StackPanel>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding Blur}" />
+            </Grid>
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel><TextBlock Text="{l:T set.anim}" /><TextBlock Classes="sub" Text="{l:T set.anim.sub}" FontSize="12" /></StackPanel>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding Animations}" />
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!-- audio -->
+        <Border Grid.Column="2" Classes="card">
+          <StackPanel Spacing="12">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.Speaker}" Foreground="{DynamicResource AccentBrush}" />
+                <TextBlock Classes="h2" Text="{l:T set.audio}" VerticalAlignment="Center" />
+              </StackPanel>
+              <Button Grid.Column="2" Classes="icon" Command="{Binding RefreshCommand}" ToolTip.Tip="{l:T set.refresh}">
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.RotateCcw}" FontSize="14" />
+              </Button>
+            </Grid>
+            <StackPanel Spacing="6">
+              <TextBlock Text="{l:T set.voicedev}" />
+              <ComboBox ItemsSource="{Binding VoiceDevices}" SelectedItem="{Binding VoiceDevice}" />
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{l:T set.voicevol}" /><TextBlock Grid.Column="1" Classes="val" Text="{Binding VoiceVolumeText}" /></Grid>
+              <Slider Minimum="0" Maximum="150" Value="{Binding VoiceVolume}" />
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <TextBlock Text="{l:T set.mondev}" />
+              <ComboBox ItemsSource="{Binding MonitorDevices}" SelectedItem="{Binding MonitorDevice}" />
+            </StackPanel>
+            <StackPanel Spacing="6">
+              <Grid ColumnDefinitions="*,Auto"><TextBlock Text="{l:T set.monvol}" /><TextBlock Grid.Column="1" Classes="val" Text="{Binding MonitorVolumeText}" /></Grid>
+              <Slider Minimum="0" Maximum="150" Value="{Binding MonitorVolume}" />
+            </StackPanel>
+            <Grid ColumnDefinitions="*,Auto">
+              <StackPanel><TextBlock Text="{l:T hear.sounds}" /><TextBlock Classes="sub" Text="{l:T hear.sounds.tip}" FontSize="12" /></StackPanel>
+              <ToggleSwitch Grid.Column="1" IsChecked="{Binding MonitorEnabled}" />
+            </Grid>
+          </StackPanel>
+        </Border>
+      </Grid>
+
+      <!-- how to -->
+      <Border Classes="card">
+        <Grid ColumnDefinitions="*,20,300">
+          <StackPanel Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Classes="icon" Text="{x:Static l:Ic.Cable}" Foreground="{DynamicResource AccentBrush}" />
+              <TextBlock Classes="h2" Text="{l:T set.how}" VerticalAlignment="Center" />
+            </StackPanel>
+            <TextBlock Classes="sub" Text="{l:T set.how.1}" FontSize="13" />
+            <TextBlock Classes="sub" Text="{l:T set.how.2}" FontSize="13" />
+            <TextBlock Classes="sub" Text="{l:T set.how.3}" FontSize="13" />
+            <TextBlock Classes="sub" Text="{l:T set.how.4}" FontSize="13" />
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+              <Button Classes="primary" Command="{Binding Main.InstallDriverCommand}" IsVisible="{Binding Main.CanInstall}" ToolTip.Tip="{l:T drv.tip}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBlock Classes="icon" Text="{x:Static l:Ic.ShieldCheck}" FontSize="14" />
+                  <TextBlock Text="{l:T drv.install}" />
+                </StackPanel>
+              </Button>
+              <Button Command="{Binding Main.RemoveDriverCommand}" IsVisible="{Binding Main.CanRemove}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBlock Classes="icon" Text="{x:Static l:Ic.Trash2}" FontSize="14" />
+                  <TextBlock Text="{l:T drv.remove}" />
+                </StackPanel>
+              </Button>
+              <TextBlock Classes="sub" Text="{Binding Main.InstallText}" VerticalAlignment="Center" FontSize="12" />
+            </StackPanel>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Spacing="10">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Classes="icon" Text="{x:Static l:Ic.Keyboard}" Foreground="{DynamicResource AccentBrush}" />
+              <TextBlock Classes="h2" Text="{l:T set.hotkeys}" VerticalAlignment="Center" />
+            </StackPanel>
+            <StackPanel Spacing="5">
+              <TextBlock Text="{l:T set.hk.stop}" FontSize="13" />
+              <TextBox Text="{Binding StopHotkey}" Watermark="Ctrl+Alt+S" />
+            </StackPanel>
+            <StackPanel Spacing="5">
+              <TextBlock Text="{l:T set.hk.changer}" FontSize="13" />
+              <TextBox Text="{Binding ChangerHotkey}" Watermark="Ctrl+Alt+V" />
+            </StackPanel>
+            <TextBlock Classes="sub" Text="{l:T set.hk.hint}" FontSize="12" />
+          </StackPanel>
+        </Grid>
+      </Border>
+
+      <Border Classes="card">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <v:LogoMark Width="40" Height="40" Margin="0,0,14,0" Back="{DynamicResource AccentBrush}" Bars="{DynamicResource OnAccentBrush}" />
+          <StackPanel Grid.Column="1" VerticalAlignment="Center">
+            <TextBlock Text="{Binding Version}" FontWeight="SemiBold" />
+            <TextBlock Classes="sub" Text="{l:T set.about}" />
+          </StackPanel>
+          <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+            <Button Command="{Binding ClearCacheCommand}" ToolTip.Tip="{l:T set.cache.tip}">
+              <StackPanel Orientation="Horizontal" Spacing="7">
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.Trash2}" FontSize="14" />
+                <TextBlock Text="{Binding CacheText}" />
+              </StackPanel>
+            </Button>
+            <Button Command="{Binding OpenDataCommand}">
+              <StackPanel Orientation="Horizontal" Spacing="7">
+                <TextBlock Classes="icon" Text="{x:Static l:Ic.FolderOpen}" FontSize="14" />
+                <TextBlock Text="{l:T set.data}" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>
